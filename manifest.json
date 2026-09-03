@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "MyDL - Send to Downloader",
+  "version": "1.2.0",
+  "description": "Send VK and X links/posts to a local downloader API.",
+  "permissions": ["contextMenus", "notifications"],
+  "host_permissions": ["https://yt.kapoww.tk/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://x.com/*",
+        "*://www.x.com/*",
+        "*://vk.ru/*",
+        "*://*.vk.ru/*",
+        "*://vk.com/*",
+        "*://*.vk.com/*",
+        "*://pornhub.org/*",
+        "*://*.pornhub.org/*",
+        "*://pornhub.com/*",
+        "*://*.pornhub.com/*"
+      ],
+      "js": ["content-x.js", "content-vk.js", "content-ph.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "128": "icon.svg"
+  }
+}
