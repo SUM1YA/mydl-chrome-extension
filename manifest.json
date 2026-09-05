@@ -22,7 +22,7 @@
         "*://pornhub.com/*",
         "*://*.pornhub.com/*"
       ],
-      "js": ["content-x.js", "content-vk.js", "content-ph.js"],
+      "js": ["content-x.js", "content-vk.js"],
       "run_at": "document_idle"
     }
   ],
