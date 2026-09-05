@@ -78,14 +78,29 @@
     wrapper.appendChild(button);
   }
 
-  function scan() {
-    document.querySelectorAll("video").forEach(addButton);
+  function scan(root = document) {
+    if (root instanceof HTMLVideoElement) addButton(root);
+    root.querySelectorAll?.("video").forEach(addButton);
   }
 
+  let scanQueued = false;
+  const observer = new MutationObserver((mutations) => {
+    if (scanQueued) return;
+    scanQueued = true;
+
+    queueMicrotask(() => {
+      scanQueued = false;
+      for (const mutation of mutations) {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) scan(node);
+        });
+      }
+    });
+  });
+
   scan();
-  new MutationObserver(scan).observe(document.documentElement, {
+  observer.observe(document.documentElement, {
     childList: true,
     subtree: true
   });
-  setInterval(scan, 1500);
 })();

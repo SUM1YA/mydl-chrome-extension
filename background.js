@@ -1,6 +1,6 @@
 importScripts("api.js");
 
-const API_URL = globalThis.MYDL_CONFIG?.API_URL;
+const API_ENDPOINT = globalThis.MYDL_CONFIG?.API_URL;
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -17,12 +17,20 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener(async (info) => {
-  const url = info.linkUrl || info.srcUrl;
+  const isPornhub = isPornhubUrl(info.pageUrl);
+  const url = info.linkUrl || (isPornhub && info.mediaType === "video"
+    ? info.pageUrl
+    : info.srcUrl);
   if (!url) {
     notify("MyDL", "No URL found.");
     return;
   }
-  await submitJob(url, getCookieFile(info.pageUrl || url));
+
+  try {
+    await submitJob(url, getCookieFile(info.pageUrl || url));
+  } catch (error) {
+    notify("MyDL - Request failed", error instanceof Error ? error.message : String(error));
+  }
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -51,7 +59,7 @@ async function submitJob(url, cookieFile) {
     cookieFile
   };
 
-  const response = await fetch(API_URL, {
+  const response = await fetch(API_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -86,4 +94,14 @@ function getCookieFile(url) {
   } catch (_) {}
 
   return "m.vk.ru_cookies.txt";
+}
+
+function isPornhubUrl(url) {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return hostname === "pornhub.com" || hostname.endsWith(".pornhub.com") ||
+      hostname === "pornhub.org" || hostname.endsWith(".pornhub.org");
+  } catch (_) {
+    return false;
+  }
 }
