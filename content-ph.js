@@ -2,9 +2,13 @@
   "use strict";
 
   const hostname = location.hostname.toLowerCase();
-  if (!hostname.endsWith("pornhub.com") && !hostname.endsWith("pornhub.org")) return;
+  if (!/^(www\.)?pornhub\.(com|org)$/.test(hostname)) return;
 
   const BUTTON_ATTR = "data-mydl-ph-button";
+
+  function isVideoElement(element) {
+    return element instanceof HTMLVideoElement;
+  }
 
   function getPageUrl(video) {
     const link = video.closest("a[href]");
@@ -12,10 +16,14 @@
   }
 
   function addButton(video) {
-    if (!video || video.hasAttribute(BUTTON_ATTR)) return;
+    if (!isVideoElement(video) || video.hasAttribute(BUTTON_ATTR)) return;
 
     const wrapper = video.parentElement;
     if (!wrapper) return;
+
+    if (getComputedStyle(wrapper).position === "static") {
+      wrapper.style.position = "relative";
+    }
 
     const button = document.createElement("button");
     button.type = "button";
@@ -37,8 +45,6 @@
       "cursor:pointer",
       "box-shadow:0 2px 8px rgba(0,0,0,.35)"
     ].join(";");
-
-    if (getComputedStyle(wrapper).position === "static") wrapper.style.position = "relative";
 
     button.addEventListener("click", async (event) => {
       event.preventDefault();
